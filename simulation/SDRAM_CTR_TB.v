@@ -1,18 +1,17 @@
-module tb;
+module tb(m_clock, p_reset, sdrclk, sdrclk1);
+  	input p_reset, m_clock, sdrclk, sdrclk1;
+	wire p_reset, m_clock, sdrclk, sdrclk1;
 	parameter tCYC_SDRAM=7.5;
 	parameter tCYC_TOP=20;
 	parameter tPD=(tCYC_TOP/10);
 
-	reg p_reset;
-	reg m_clock;
-	reg sdrclk;
-
 	SDRAM_SIM SDRAM_SIM_instance(
 		.p_reset(p_reset),
 		.m_clock(m_clock),
-		.sdrclk(sdrclk)
+		.sdrclk(sdrclk),
+		.sdrclk1(sdrclk1)
 	);
-
+	/*
 	initial forever #(tCYC_TOP/2) m_clock = ~m_clock;
 	initial forever #(tCYC_SDRAM/2) sdrclk = ~sdrclk;
 
@@ -29,4 +28,5 @@ module tb;
 		#(tCYC_TOP)
 			p_reset = 0;
 	end
+	*/
 endmodule

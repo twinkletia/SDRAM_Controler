@@ -39,9 +39,9 @@
 #define W_EXE 		W_ACT+tRCD
 #define W_ENDPRE	W_EXE+tDAL
 
-#define M_OPTION	6'b000000	// オプション
+#define M_OPTION	6'b000100	// オプション
 #define M_CASL		3'b010		// CASレーテンシ
-#define M_WRAP		1'b0		// ラップタイプ
+#define M_WRAP		1'b1		// ラップタイプ
 #define M_BURST		3'b000		// バースト長
 
 module SDRAM_CTR{
@@ -102,10 +102,18 @@ module SDRAM_CTR{
 		else				cnt++;
 
 		alt{
+			/*
+				初期化のため、nopで最低100us待つ必要がある。(INIT_WAIT)
+				待ち終わったら、全バンクをアイドル状態にするために、
+				全バンクプリチャージをする。
+			*/
 			cnt <= INIT_WAIT: cmd_nop();
 			cnt == INIT_PALL: cmd_pall();
+			/*
+				初期化後、最低8回オートリフレッシュを行う。
+				終了次第、モードレジスタを使用することができる。
+			*/
 			cnt <  INIT_REF1: cmd_nop();
-
 			cnt == INIT_REF1: cmd_ref();
 			cnt <  INIT_REF2: cmd_nop();
 			cnt == INIT_REF2: cmd_ref();
@@ -122,7 +130,9 @@ module SDRAM_CTR{
 			cnt <  INIT_REF8: cmd_nop();
 			cnt == INIT_REF8: cmd_ref();
 			cnt <  INIT_MRS : cmd_nop();
-
+			/*
+				モードレジスタをセットし、初期化処理を終える。
+			*/
 			cnt == INIT_MRS :{
 				cmd_mrs();
 				ldqm := 0;

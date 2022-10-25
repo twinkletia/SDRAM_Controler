@@ -629,5 +629,8 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to VGA_VS
 #set_instance_assignment -name FAST_INPUT_REGISTER ON -to DRAM_DQ[14]
 #set_instance_assignment -name FAST_INPUT_REGISTER ON -to DRAM_DQ[15]
 
+set_instance_assignment -name PLL_COMPENSATION_MODE DIRECT -to "*pll*|altera_pll:altera_pll_i*|*" 
+set_instance_assignment -name PLL_AUTO_RESET OFF -to "*pll*|altera_pll:altera_pll_i*|*"
+set_instance_assignment -name PLL_BANDWIDTH_PRESET AUTO -to "*pll*|altera_pll:altera_pll_i*|*"
 project_close
 

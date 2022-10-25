@@ -6,3 +6,8 @@ SDRAM_SIM.v
 ASYNCRX.v
 ASYNCTX.v
 *.swp
+out/
+obj_dir/
+synth/
+.vscode/
+pll/

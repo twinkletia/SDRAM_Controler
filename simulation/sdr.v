@@ -23,7 +23,7 @@
 *                IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR
 *                A PARTICULAR PURPOSE, OR AGAINST INFRINGEMENT.
 *
-*                Copyright © 2001 Micron Semiconductor Products, Inc.
+*                Copyright ï¿½ 2001 Micron Semiconductor Products, Inc.
 *                All rights researved
 *
 * Rev  Author          Date        Changes
@@ -39,7 +39,7 @@
 *
 **************************************************************************/
 
-`timescale 1ns / 1ps
+`timescale 1ns / 10ps
 
 module sdr (Dq, Addr, Ba, Clk, Cke, Cs_n, Ras_n, Cas_n, We_n, Dqm);
 
@@ -161,15 +161,13 @@ module sdr (Dq, Addr, Ba, Clk, Cke, Cs_n, Ras_n, Cas_n, We_n, Dqm);
     end
 
     // System clock generator
-    always begin
-        @ (posedge Clk) begin
+    always @ (posedge Clk) begin
             Sys_clk = CkeZ;
             CkeZ = Cke;
         end
-        @ (negedge Clk) begin
+    always @ (negedge Clk) begin
             Sys_clk = 1'b0;
         end
-    end
 
     // Adjust tAC, tHZ based on CAS Latency
     always @ (Cas_latency) begin
@@ -859,7 +857,7 @@ module sdr (Dq, Addr, Ba, Clk, Cke, Cs_n, Ras_n, Cas_n, We_n, Dqm);
         end
 
         if (Data_out_enable == 1'b0) begin
-            Dq_reg <= #tOH {DQ_BITS{1'bz}};
+            Dq_reg = #tOH {DQ_BITS{1'bz}};
         end
 
         // Detect Read or Write command

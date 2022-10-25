@@ -4,53 +4,38 @@
 #		make compile for synthesis all files
 #       make download for download .sof file to FPGA board
 ################################################################################
-# 2014.07.22 Initial version by T.Furukawa (based on AISoC's makefile)
+# 2011-09-12,13 Initial version by Y.Okuyama (based on PICO's makefile)
+# 2012-10-08    CABLE is modified for linux environment
+# 2013-07-09    Modified for DE0/windows environment
 ################################################################################
 
 ifndef SRCDIR
 SRCDIR	= .
 endif
-WORKDIR		= $(SRCDIR)/work
-DEBUGDIR	= $(SRCDIR)/debug
+
 VPATH		= $(SRCDIR)
-ifndef DESIGN
-DESIGN		= DE0_CV
-endif
-TARGET		=
-PROJECT		= $(DESIGN)
+WORKDIR		= synth
+DESIGN		= SDRAM
+BOARD		= DE0_CV
 NSL2VL    	= nsl2vl
-NSL2SC    	= nsl2sc
-NSLFLAGS  	= -sim -neg_res -I$(SRCDIR) 
-NSLSCFLAGS	= $(NSLFLAGS) -sc_split_header -sc_trace
-MKPROJ		= $(SRCDIR)/mkproj-$(DESIGN).tcl
-LBITS		= $(shell getconf LONG_BIT)
-ifeq	($(LBITS),64)
-	Q2SH		= quartus_sh --64bit
-	Q2PGM		= quartus_pgm --64bit
-else
-	Q2SH		= quartus_sh 
-	Q2PGM		= quartus_pgm 
-endif
-Q2SHOPT		= -fit "fast fit"
-
-CABLE		= "USB-Blaster"
+NSLFLAGS  	= -O2 -neg_res -I$(SRCDIR)
+MKPROJ		= $(SRCDIR)/mkproj-$(BOARD).tcl
+Q2SH		= quartus_sh
+Q2PGM		= quartus_pgm
+CABLE		= "USB-Blaster [USB-0]"
 PMODE		= JTAG
+SIMTOP=tb
+TESTBENCH=testBench
+SIMSRCS 		= $(wildcard simulation/*.nsl) $(wildcard $(SRCDIR)/[^DE0_CV]*.nsl)
+SIMVFILES 		= $(addprefix out/, $(patsubst %.nsl,%.v,$(notdir $(SIMSRCS))))
 
-VERIOPT		= -LDFLAGS -lX11
-SRCS		= SDRAM_CTR.nsl ASYNCRX.nsl ASYNCTX.nsl
-SYNTHSRCS	= $(PROJECT).nsl $(SRCS)
-VFILES 		= $(SYNTHSRCS:%.nsl=%.v)
-LIBS		= pll.v pll/pll_0002.v
+
+SRCS		:= $(wildcard $(SRCDIR)/*.nsl)
+VFILES 		= $(SRCS:$(SRCDIR)/%.nsl=%.v)	#patsubst syntax sugar
+LIBS		= 
 RESULT		= result.txt
 
-SCFILES		=$(SRCS:%.nsl=%.sc)
-INCDIR		=$(SYSTEMC_INCLUDE_DIRS) -I$(DEBUGDIR) -I$(SRCDIR)
-LIBDIR		=$(SYSTEMC_LIBRARY_DIRS)
-LIBSC		=-lsystemc -x c++
-
-##################################################################################
-#quartus
-##################################################################################
+########
 
 all:
 	@if [ ! -d $(WORKDIR) ]; then \
@@ -62,98 +47,62 @@ all:
 ########
 
 .SUFFIXES: .v .nsl
+.PHONY: test test2
 
-%.v:%.nsl
-	$(NSL2VL) $(NSLFLAGS) $< -o $@
+%.v: %.nsl
+	$(NSL2VL) $(NSLFLAGS)  $< -o $@
 
-$(PROJECT).qsf: $(VFILES) $(LIBS) 
-	$(Q2SH) -t $(MKPROJ) $(Q2SHOPT) -project $(PROJECT) $^
+test3:
+	@echo $(SIMSRCS)
 
-$(PROJECT).sof: $(PROJECT).qsf 
-	$(Q2SH) --flow compile $(PROJECT)
+out/%.v: $(SIMSRCS)
+	if [ ! -d out ]; then \
+		mkdir out; \
+	fi
+	$(NSL2VL) $(NSLFLAGS) -Isimulation $(filter $(shell echo $^ | grep "[^ ]*$*.nsl" -o), $^) -o $@
+
+sim: $(SIMVFILES)
+	sed -i -e "s/#include \"V.*\.h\"/#include \"V$(SIMTOP)\.h\"/g" $(TESTBENCH).cpp
+	sed -i -e"s/V.*\\\*top;/V$(SIMTOP) *top;/g" $(TESTBENCH).cpp
+	sed -i -e"s/top = new V.*;/top = new V$(SIMTOP);/g" $(TESTBENCH).cpp
+	cp $(SRCDIR)/simulation/sdr.v out/
+	cp $(SRCDIR)/simulation/SDRAM_CTR_TB.v out/
+	verilator -Wno-STMTDLY -Wno-TIMESCALEMOD -Wno-REALCVT -Wno-INFINITELOOP -Wno-IMPLICIT -Wno-WIDTH -cc --trace --trace-underscore out/*.v -Isimulation --top-module $(SIMTOP) -exe $(TESTBENCH).cpp -O3
+	make -C $(SRCDIR)/obj_dir/ -f V$(SIMTOP).mk
+	$(SRCDIR)/obj_dir/V$(SIMTOP)
+
+test: $(VFILES)
+	mv $(VFILES) $(WORKDIR)/
+
+test2:
+	@echo $(VFILES)
+
+$(DESIGN).qsf: $(VFILES) $(LIBS)
+	$(SRCDIR)/PLLgen.sh
+	cp $(SRCDIR)/pll/pll.v ./
+	$(Q2SH) -t $(MKPROJ) -project $(DESIGN) $^
+
+$(DESIGN).sof: $(DESIGN).qsf $(MIFS)
+	$(Q2SH) --flow compile $(DESIGN)
 
 ########
 
-compile: $(PROJECT).sof
-	@echo "**** $(PROJECT).fit.summary" | tee -a $(RESULT)
-	@cat $(PROJECT).fit.summary | tee -a $(RESULT)
-	@echo "**** $(PROJECT).tan.rpt" | tee -a $(RESULT)
-#	@grep "Info: Fmax" $(PROJECT).tan.rpt | tee -a $(RESULT)
+compile: $(DESIGN).sof
+#	@echo "**** $(DESIGN).fit.summary" | tee -a $(RESULT)
+#	@cat $(DESIGN).fit.summary | tee -a $(RESULT)
+#	@echo "**** $(DESIGN).tan.rpt" | tee -a $(RESULT)
+#	@grep "Info: Fmax" $(DESIGN).tan.rpt | tee -a $(RESULT)
 
 download: config-n
 
 config: all
-	$(Q2PGM) -c $(CABLE) -m $(PMODE) -o "p;$(WORKDIR)/$(PROJECT).sof"
+	$(Q2PGM) -c $(CABLE) -m $(PMODE) -o "p;$(WORKDIR)/$(DESIGN).sof"
 config-n: # without re-compile
-	$(Q2PGM) -c $(CABLE) -m $(PMODE) -o "p;$(WORKDIR)/$(PROJECT).sof"
-
-##################################################################################
-#verilator
-##################################################################################
-
-%.sim:
-	@if [ ! -d $(DEBUGDIR) ]; then \
-		echo mkdir $(DEBUGDIR); \
-		mkdir $(DEBUGDIR); \
-	fi
-	( cd $(DEBUGDIR); make -f ../Makefile SRCDIR=.. TARGET=$(@:%.sim=%) V$(@:%.sim=%) )
-
-V$(TARGET).h: $(VFILES) $(TARGET)_sim.cpp
-	sed -i -e "s/#1//" *.v
-	verilator --cc $(VERIOPT) $(TARGET).v --exe $(SRCDIR)/$(TARGET)_sim.cpp
-
-V$(TARGET): V$(TARGET).h 
-	@echo "simulation"
-	(cd obj_dir; make -j -f V$(TARGET).mk V$(TARGET) )
-
-%.run:%.sim
-	(time $(DEBUGDIR)/obj_dir/V$(@:%.run=%))
-
-%.rerun:
-	(time $(DEBUGDIR)/obj_dir/V$(@:%.rerun=%))
-
-
-##################################################################################
-#iverilog
-##################################################################################
-
-%.:
-	@if [ ! -d $(DEBUGDIR) ]; then \
-		echo mkdir $(DEBUGDIR); \
-		mkdir $(DEBUGDIR); \
-	fi
-	( cd $(DEBUGDIR); make -f ../Makefile SRCDIR=.. TARGET=$(@:%.sim=%) V$(@:%.sim=%) )
-
-%.vvp: $(TARGET)_sim.v $(VFILES)
-	iverilog -o $@ 
-
-
-
-
+	$(Q2PGM) -c $(CABLE) -m $(PMODE) -o "p;$(WORKDIR)/$(DESIGN).sof"
 
 clean:
-	rm -rf - $(WORKDIR)
-	rm -rf - $(DEBUGDIR)
+	rm -rf - $(WORKDIR) obj_dir out
 
-##################################################################################
-#SystemC
-##################################################################################
-%.sc:%.nsl
-	$(NSL2SC) $(NSLSCFLAGS) $< -o $@
-	echo '#include "NSL_SC.cpp"'>> $*.sc
+########
 
-%.scsim:
-	@if [ ! -d $(DEBUGDIR) ]; then \
-		echo mkdir $(DEBUGDIR); \
-		mkdir $(DEBUGDIR); \
-	fi
-	( cd $(DEBUGDIR); make -f ../Makefile SRCDIR=.. PROJECT=$(@:%.scsim=%) $(@:%.scsim=%).run )
-
-$(PROJECT).exe:$(PROJECT)_main.cpp $(SCFILES)
-	$(CXX) $(CXXFLAGS) $(INCDIR) $(LIBDIR) -o $@ $(LIBSC) $< $(SCFILES)
-
-$(PROJECT).run: $(PROJECT).exe
-	$(DEBUGDIR)/$(PROJECT).exe
-	
-##################################################################################
-
+#$(DESIGN).v	: $(DESIGN).nsl
