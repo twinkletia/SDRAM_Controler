@@ -87,7 +87,7 @@ $(DESIGN).sof: $(DESIGN).qsf $(MIFS)
 
 ########
 
-compile: $(DESIGN).sof
+compile: $(DESIGN).qsf
 #	@echo "**** $(DESIGN).fit.summary" | tee -a $(RESULT)
 #	@cat $(DESIGN).fit.summary | tee -a $(RESULT)
 #	@echo "**** $(DESIGN).tan.rpt" | tee -a $(RESULT)

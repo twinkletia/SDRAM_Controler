@@ -121,6 +121,7 @@ module sdr (Dq, Addr, Ba, Clk, Cke, Cs_n, Ras_n, Cas_n, We_n, Dqm);
     wire      Dq_chk           = Sys_clk & Data_in_enable;      // Check setup/hold time for DQ
     
     assign    Dq               = Dq_reg;                        // DQ buffer
+    var      dtes;
 
     // Commands Operation
     `define   ACT       0
@@ -962,6 +963,7 @@ module sdr (Dq, Addr, Ba, Clk, Cke, Cs_n, Ras_n, Cas_n, We_n, Dqm);
             // Display debug message
             Dq_reg = #tAC Dq_dqm;
             if (Debug) begin
+                dtes = 1'b1;
                 $display("%m : at time %t READ : Bank = %d Row = %d, Col = %d, Dqm = %b, Data = %h", $time, Bank, Row, Col, Dqm_reg0, Dq_reg);
             end
 

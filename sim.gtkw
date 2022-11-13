@@ -1,23 +1,24 @@
 [*]
 [*] GTKWave Analyzer v3.3.100 (w)1999-2019 BSI
-[*] Wed Jul 06 00:32:40 2022
+[*] Sun Nov 13 03:03:37 2022
 [*]
 [dumpfile] "\\wsl$\Ubuntu-20.04\home\nao\lab\SDRAM_Controler\wave.vcd"
-[dumpfile_mtime] "Wed Jul 06 00:29:35 2022"
-[dumpfile_size] 20198243
+[dumpfile_mtime] "Sun Nov 13 03:02:48 2022"
+[dumpfile_size] 20206015
 [savefile] "\\wsl$\Ubuntu-20.04\home\nao\lab\SDRAM_Controler\sim.gtkw"
-[timestart] 1505000
-[size] 1920 1017
+[timestart] 2091700
+[size] 1920 1008
 [pos] -1 -1
-*-17.000000 1037500 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-16.000000 2247600 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.tb.
 [treeopen] TOP.tb.SDRAM_SIM_instance.
 [treeopen] TOP.tb.SDRAM_SIM_instance.sdrctr.
+[treeopen] TOP.tb.SDRAM_SIM_instance.sdrmodel.
 [sst_width] 197
 [signals_width] 198
 [sst_expanded] 1
-[sst_vpaned_height] 301
+[sst_vpaned_height] 300
 @28
 TOP.tb.m_clock
 TOP.tb.SDRAM_SIM_instance.sdrctr.m_clock
@@ -29,14 +30,39 @@ TOP.tb.SDRAM_SIM_instance.sdrctr.cnt[7:0]
 @28
 TOP.tb.SDRAM_SIM_instance.sdrctr.cmd_act
 TOP.tb.SDRAM_SIM_instance.sdrctr.cmd_nop
-@29
 TOP.tb.SDRAM_SIM_instance.sdrctr.cmd_wta
+TOP.tb.SDRAM_SIM_instance.sdrctr.cmd_rda
+@22
+TOP.tb.SDRAM_SIM_instance.sdrctr.DRAM_DI[15:0]
+TOP.tb.SDRAM_SIM_instance.sdrctr.DRAM_DO[15:0]
 @28
 TOP.tb.SDRAM_SIM_instance.sdrmodel.Bank[1:0]
 @22
 TOP.tb.SDRAM_SIM_instance.sdrmodel.Row[12:0]
 TOP.tb.SDRAM_SIM_instance.sdrmodel.Col[9:0]
+@c00022
 TOP.tb.SDRAM_SIM_instance.sdrmodel.Dq_dqm[15:0]
+@28
+(0)TOP.tb.SDRAM_SIM_instance.sdrmodel.Dq_dqm[15:0]
+(1)TOP.tb.SDRAM_SIM_instance.sdrmodel.Dq_dqm[15:0]
+(2)TOP.tb.SDRAM_SIM_instance.sdrmodel.Dq_dqm[15:0]
+(3)TOP.tb.SDRAM_SIM_instance.sdrmodel.Dq_dqm[15:0]
+(4)TOP.tb.SDRAM_SIM_instance.sdrmodel.Dq_dqm[15:0]
+(5)TOP.tb.SDRAM_SIM_instance.sdrmodel.Dq_dqm[15:0]
+(6)TOP.tb.SDRAM_SIM_instance.sdrmodel.Dq_dqm[15:0]
+(7)TOP.tb.SDRAM_SIM_instance.sdrmodel.Dq_dqm[15:0]
+(8)TOP.tb.SDRAM_SIM_instance.sdrmodel.Dq_dqm[15:0]
+(9)TOP.tb.SDRAM_SIM_instance.sdrmodel.Dq_dqm[15:0]
+(10)TOP.tb.SDRAM_SIM_instance.sdrmodel.Dq_dqm[15:0]
+(11)TOP.tb.SDRAM_SIM_instance.sdrmodel.Dq_dqm[15:0]
+(12)TOP.tb.SDRAM_SIM_instance.sdrmodel.Dq_dqm[15:0]
+(13)TOP.tb.SDRAM_SIM_instance.sdrmodel.Dq_dqm[15:0]
+(14)TOP.tb.SDRAM_SIM_instance.sdrmodel.Dq_dqm[15:0]
+(15)TOP.tb.SDRAM_SIM_instance.sdrmodel.Dq_dqm[15:0]
+@1401200
+-group_end
+@29
+TOP.tb.SDRAM_SIM_instance.sdrmodel.dtes
 @28
 TOP.tb.SDRAM_SIM_instance.tx.aTxReq
 TOP.tb.SDRAM_SIM_instance.sdrctr.rx.aRxReq

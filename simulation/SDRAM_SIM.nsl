@@ -20,6 +20,7 @@ module SDRAM_SIM{
 	reg cnt[10] = 0;
 	reg bank[2], row[13], column[10], data[16];
 	reg datao[16];
+	reg finish_status = 0;
 	
 	proc_name sdram_write(bank, row, column, data);
 	proc_name sdram_read(bank, row, column);
@@ -48,11 +49,15 @@ module SDRAM_SIM{
 	sdrmodel.We_n  = sdrctr.DRAM_WE;
 
 	/* シミュレーションここから */
+	finish_status := sdrctr.finish_init;
 	if(sdrctr.finish_init) cnt++;
+	if(finish_status != sdrctr.finish_init){
+		_display("\nSDRAM INITIALLIZATION FINISHED\n");
+	}
 
 	any{
 		cnt == 10'd10: sdram_write(2'd0, 13'd100, 10'd0, 16'h0CC0);
-		cnt == 10'd50: sdram_read(2'd0, 13'd100, 10'd2);
+		cnt == 10'd70: sdram_read(2'd0, 13'd100, 10'd0);
 		cnt == 10'd100: _finish("%d", datao);
 	}
 
@@ -70,7 +75,14 @@ module SDRAM_SIM{
 		sdrctr.bank    = bank;
 		sdrctr.row     = row;
 		sdrctr.column  = column;
-		sdrctr.datai   = data;
+		sdrctr.datai0   = data;
+		sdrctr.datai1   = 16'h0009;
+		sdrctr.datai2   = 16'h000A;
+		sdrctr.datai3   = 16'h000B;
+		sdrctr.datai4   = 16'h000C;
+		sdrctr.datai5   = 16'h000D;
+		sdrctr.datai6   = 16'h000E;
+		sdrctr.datai7   = 16'h000F;
 	}
 
 	proc sdram_read{
@@ -94,7 +106,7 @@ module SDRAM_SIM{
 		{
 			req_flag := 1;
 			write_flag := 0;
-			datao := sdrctr.datao;
+			datao := sdrctr.datao0;
 		}
 	}
 }

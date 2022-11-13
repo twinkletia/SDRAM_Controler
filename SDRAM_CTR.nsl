@@ -39,10 +39,10 @@
 #define W_EXE 		W_ACT+tRCD
 #define W_ENDPRE	W_EXE+tDAL
 
-#define M_OPTION	6'b000100	// オプション
+#define M_OPTION	6'b000000	// オプション
 #define M_CASL		3'b010		// CASレーテンシ
-#define M_WRAP		1'b1		// ラップタイプ
-#define M_BURST		3'b000		// バースト長
+#define M_WRAP		1'b0		// ラップタイプ
+#define M_BURST		3'b011		// バースト長
 
 module SDRAM_CTR{
 	ASYNCRX rx;
@@ -52,7 +52,8 @@ module SDRAM_CTR{
 	reg cnt[8] = 0;
 	reg ref_cnt[9] = 0;
 
-	reg data[16];
+	mem rdata[8][16];
+	mem wdata[8][16];
 	reg ldqm = 1;
 	reg udqm = 1;
 
@@ -60,7 +61,10 @@ module SDRAM_CTR{
 	reg write_req = 0;	// 書込みリクエスト
 	reg read_req = 0;	// 読込みリクエスト
 
-	reg init_flag = 1;
+	reg init_flag = 0;
+
+	func_self rburst_terminate;
+	func_self wburst_terminate;
 
 	proc_name init();
 	proc_name idle();
@@ -87,12 +91,22 @@ module SDRAM_CTR{
 	// データ受信要求
 	func rx.aRxReq any{
 		rw_mode == READ:  read_req  := 1;	
-		rw_mode == WRITE: write_req := 1;
+		rw_mode == WRITE: 	{
+								write_req := 1;
+								wdata[0] := datai0;
+								wdata[1] := datai1;
+								wdata[2] := datai2;
+								wdata[3] := datai3;
+								wdata[4] := datai4;
+								wdata[5] := datai5;
+								wdata[6] := datai6;
+								wdata[7] := datai7;
+							}
 	}
 
-	if(init_flag){
+	if(!init_flag){
 		init();
-		init_flag := 0;
+		init_flag := 1;
 	}
 
 	// SDRAM初期化
@@ -187,7 +201,15 @@ module SDRAM_CTR{
 		ref_cnt--;
 	}
 
-	datao = data;
+	datao0 = rdata[0];
+	datao1 = rdata[1];
+	datao2 = rdata[2];
+	datao3 = rdata[3];
+	datao4 = rdata[4];
+	datao5 = rdata[5];
+	datao6 = rdata[6];
+	datao7 = rdata[7];
+
 	proc read{
 		if(cnt == R_ENDPRE-8'd2) cnt := 0;
 		else					 cnt++;
@@ -199,7 +221,7 @@ module SDRAM_CTR{
 			cnt <  R_OUT:		cmd_nop();
 			cnt == R_OUT:{
 								cmd_nop();
-								data := DRAM_DI;
+								rburst_terminate();
 								rx.aRxAck();
 			}
 			cnt <  R_ENDPRE-8'd2:	cmd_nop();
@@ -219,6 +241,7 @@ module SDRAM_CTR{
 			cnt <  W_EXE:		cmd_nop();
 			cnt == W_EXE:{
 								cmd_wta();
+								wburst_terminate();
 								rx.aRxAck();
 			}
 			cnt <  W_ENDPRE-8'd2:	cmd_nop();
@@ -227,6 +250,28 @@ module SDRAM_CTR{
 									idle();
 			}
 		}
+	}
+
+	func wburst_terminate seq{
+		DRAM_DO = wdata[0];
+		DRAM_DO = wdata[1];
+		DRAM_DO = wdata[2];
+		DRAM_DO = wdata[3];
+		DRAM_DO = wdata[4];
+		DRAM_DO = wdata[5];
+		DRAM_DO = wdata[6];
+		DRAM_DO = wdata[7];
+	}
+
+	func rburst_terminate seq{
+		rdata[0] := DRAM_DI;
+		rdata[1] := DRAM_DI;
+		rdata[2] := DRAM_DI;
+		rdata[3] := DRAM_DI;
+		rdata[4] := DRAM_DI;
+		rdata[5] := DRAM_DI;
+		rdata[6] := DRAM_DI;
+		rdata[7] := DRAM_DI;
 	}
 
 	func cmd_nop{
@@ -290,6 +335,5 @@ module SDRAM_CTR{
 
 		DRAM_BA = bank;
 		DRAM_A  = 13'(column) | PRECHARGE;
-		DRAM_DO = datai;
 	}
 }

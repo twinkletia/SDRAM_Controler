@@ -18,6 +18,23 @@ declare SDRAM_CTR{
 	input	bank[2];
 	input	row[13];
 	input	column[10];
-	input	datai[16];
-	output	datao[16];
+
+	input	datai0[16];
+	input	datai1[16];
+	input	datai2[16];
+	input	datai3[16];
+	input	datai4[16];
+	input	datai5[16];
+	input	datai6[16];
+	input	datai7[16];
+	
+	output	datao0[16];
+	output	datao1[16];
+	output	datao2[16];
+	output	datao3[16];
+	output	datao4[16];
+	output	datao5[16];
+	output	datao6[16];
+	output	datao7[16];
+	input switch;
 }

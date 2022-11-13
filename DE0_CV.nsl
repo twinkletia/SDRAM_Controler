@@ -18,6 +18,14 @@ declare DE0_CV{
 	output 	DRAM_WE_N;
 	output 	DRAM_CS_N;
 
+    output HEX0[7];
+    output HEX1[7];
+    output HEX2[7];
+    output HEX3[7];
+    output HEX4[7];
+    output HEX5[7];
+	input SW[10];
+
 	output	LEDR[10];
 }
 
@@ -31,9 +39,37 @@ module DE0_CV{
 	reg cnt[10] = 0;
 	reg bank[2], row[13], column[10], data[16];
 	reg datao[16];
+	mem rdata[8][16];
+	mem encode[16][7];
+	mem sseg[6][7];
 
+	func_self init_sseg();
 	proc_name sdram_write(bank, row, column, data);
 	proc_name sdram_read(bank, row, column);
+	proc_name disp(datao);
+
+	func init_sseg{	//avoid initial begin
+		integer i;
+		generate(i=0;i<6;i++){
+			sseg[i] := 0b1111111;
+		}
+		encode[0] := 0b1000000;
+		encode[1] := 0b1111001;
+		encode[2] := 0b0100100;
+		encode[3] := 0b0110000;
+		encode[4] := 0b0011001;
+		encode[5] := 0b0010010;
+		encode[6] := 0b0000010;
+		encode[7] := 0b1111000;
+		encode[8] := 0b0000000;
+		encode[9] := 0b0010000;
+		encode[10] := 0b0001000;
+		encode[11] := 0b0000011;
+		encode[12] := 0b1000110;
+		encode[13] := 0b0100001;
+		encode[14] := 0b0000110;
+		encode[15] := 0b0001110;
+	}
 
 	// SDRAM用クロック
 	pll_i.rst     = ~p_reset;
@@ -45,7 +81,9 @@ module DE0_CV{
 	tx.aTxIn = sdram.rxout;
 	sdram.rxin = tx.aTxOut;
 
-	LEDR = datao[9:0] | 10'(sdram.finish_init);
+	sdram.switch = SW[0];
+
+	LEDR = 10'(sdram.finish_init);
 
 	if(write_flag) DRAM_DQ = sdram.DRAM_DO;
 	else           sdram.DRAM_DI = DRAM_DQ;
@@ -59,11 +97,18 @@ module DE0_CV{
 	DRAM_CKE   = sdram.DRAM_CKE;
 	DRAM_WE_N  = sdram.DRAM_WE;
 	DRAM_CS_N  = sdram.DRAM_CS;
+	HEX0 = sseg[0];
+	HEX1 = sseg[1];
+	HEX2 = sseg[2];
+	HEX3 = sseg[3];
+	HEX4 = sseg[4];
+	HEX5 = sseg[5];
 
 	if(sdram.finish_init && (cnt < 10'd51)) cnt++;
 
 	any{
-		cnt == 10'd10: sdram_write(2'd0, 13'd100, 10'd10, 16'h0AA0);
+		cnt == 10'd2:  init_sseg();
+		cnt == 10'd10: sdram_write(2'd0, 13'd100, 10'd10, 16'h0CC0);
 		cnt == 10'd50: sdram_read(2'd0, 13'd100, 10'd10);
 	}
 
@@ -79,7 +124,14 @@ module DE0_CV{
 		sdram.bank    = bank;
 		sdram.row     = row;
 		sdram.column  = column;
-		sdram.datai   = data;
+		sdram.datai0   = 16'hF0F0;//data;
+		sdram.datai1   = 16'h0000;
+		sdram.datai2   = 16'h0F0F;
+		sdram.datai3   = 16'h0000;
+		sdram.datai4   = 16'hC0C0;
+		sdram.datai5   = 16'h0000;
+		sdram.datai6   = 16'h0C0C;
+		sdram.datai7   = 16'h0000;
 	}
 
 	proc sdram_read{
@@ -103,7 +155,36 @@ module DE0_CV{
 		{
 			req_flag := 1;
 			write_flag := 0;
-			datao := sdram.datao;
+			rdata[0] := sdram.datao0;
+			rdata[1] := sdram.datao1;
+			rdata[2] := sdram.datao2;
+			rdata[3] := sdram.datao3;
+			rdata[4] := sdram.datao4;
+			rdata[5] := sdram.datao5;
+			rdata[6] := sdram.datao6;
+			rdata[7] := sdram.datao7;
 		}
+			disp(rdata[0]);
+			disp(rdata[1]);
+			disp(rdata[2]);
+			disp(rdata[3]);
+			disp(rdata[4]);
+			disp(rdata[5]);
+			disp(rdata[6]);
+			disp(rdata[7]);
+	}
+
+	proc disp{
+		reg cnt_1s[26];
+		if(cnt_1s == 50000000){
+			cnt_1s := 0;
+			finish();
+		}else{
+			cnt_1s++;
+		}
+		sseg[3] := encode[datao[15:12]];
+		sseg[2] := encode[datao[11:8]];
+		sseg[1] := encode[datao[7:4]];
+		sseg[0] := encode[datao[3:0]];
 	}
 }
