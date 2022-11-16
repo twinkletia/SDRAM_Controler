@@ -79,7 +79,7 @@ test2:
 
 $(DESIGN).qsf: $(VFILES) $(LIBS)
 	$(SRCDIR)/PLLgen.sh
-	cp $(SRCDIR)/pll/pll.v ./
+	cp pll/pll.v ./
 	$(Q2SH) -t $(MKPROJ) -project $(DESIGN) $^
 
 $(DESIGN).sof: $(DESIGN).qsf $(MIFS)

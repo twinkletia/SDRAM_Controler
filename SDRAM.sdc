@@ -1,0 +1,2 @@
+create_clock -period 50MHz -name m_clock m_clock
+create_clock -period 133.3MHz -name pll_i|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk pll_i|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk

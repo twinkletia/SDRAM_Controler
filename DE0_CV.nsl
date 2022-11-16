@@ -39,6 +39,7 @@ module DE0_CV{
 	reg cnt[10] = 0;
 	reg bank[2], row[13], column[10], data[16];
 	reg datao[16];
+	reg cnt_1s[26];
 	mem rdata[8][16];
 	mem encode[16][7];
 	mem sseg[6][7];
@@ -47,6 +48,13 @@ module DE0_CV{
 	proc_name sdram_write(bank, row, column, data);
 	proc_name sdram_read(bank, row, column);
 	proc_name disp(datao);
+	proc_name disp2(datao);
+	proc_name disp3(datao);
+	proc_name disp4(datao);
+	proc_name disp5(datao);
+	proc_name disp6(datao);
+	proc_name disp7(datao);
+	proc_name disp8(datao);
 
 	func init_sseg{	//avoid initial begin
 		integer i;
@@ -124,14 +132,14 @@ module DE0_CV{
 		sdram.bank    = bank;
 		sdram.row     = row;
 		sdram.column  = column;
-		sdram.datai0   = 16'hF0F0;//data;
-		sdram.datai1   = 16'h0000;
-		sdram.datai2   = 16'h0F0F;
-		sdram.datai3   = 16'h0000;
-		sdram.datai4   = 16'hC0C0;
-		sdram.datai5   = 16'h0000;
-		sdram.datai6   = 16'h0C0C;
-		sdram.datai7   = 16'h0000;
+		sdram.datai0   = 16'h1234;//data;
+		sdram.datai1   = 16'h3456;
+		sdram.datai2   = 16'h5678;
+		sdram.datai3   = 16'h789A;
+		sdram.datai4   = 16'h9ABC;
+		sdram.datai5   = 16'hBCDE;
+		sdram.datai6   = 16'hDEF0;
+		sdram.datai7   = 16'hF012;
 	}
 
 	proc sdram_read{
@@ -155,6 +163,8 @@ module DE0_CV{
 		{
 			req_flag := 1;
 			write_flag := 0;
+		}
+		{
 			rdata[0] := sdram.datao0;
 			rdata[1] := sdram.datao1;
 			rdata[2] := sdram.datao2;
@@ -165,17 +175,100 @@ module DE0_CV{
 			rdata[7] := sdram.datao7;
 		}
 			disp(rdata[0]);
-			disp(rdata[1]);
-			disp(rdata[2]);
-			disp(rdata[3]);
-			disp(rdata[4]);
-			disp(rdata[5]);
-			disp(rdata[6]);
-			disp(rdata[7]);
+			disp2(rdata[1]);
+			disp3(rdata[2]);
+			disp4(rdata[3]);
+			disp5(rdata[4]);
+			disp6(rdata[5]);
+			disp7(rdata[6]);
+			disp8(rdata[7]);
 	}
 
 	proc disp{
-		reg cnt_1s[26];
+		if(cnt_1s == 50000000){
+			cnt_1s := 0;
+			finish();
+		}else{
+			cnt_1s++;
+		}
+		sseg[3] := encode[datao[15:12]];
+		sseg[2] := encode[datao[11:8]];
+		sseg[1] := encode[datao[7:4]];
+		sseg[0] := encode[datao[3:0]];
+	}
+	proc disp2{
+		if(cnt_1s == 50000000){
+			cnt_1s := 0;
+			finish();
+		}else{
+			cnt_1s++;
+		}
+		sseg[3] := encode[datao[15:12]];
+		sseg[2] := encode[datao[11:8]];
+		sseg[1] := encode[datao[7:4]];
+		sseg[0] := encode[datao[3:0]];
+	}
+	proc disp3{
+		if(cnt_1s == 50000000){
+			cnt_1s := 0;
+			finish();
+		}else{
+			cnt_1s++;
+		}
+		sseg[3] := encode[datao[15:12]];
+		sseg[2] := encode[datao[11:8]];
+		sseg[1] := encode[datao[7:4]];
+		sseg[0] := encode[datao[3:0]];
+	}
+	proc disp4{
+		if(cnt_1s == 50000000){
+			cnt_1s := 0;
+			finish();
+		}else{
+			cnt_1s++;
+		}
+		sseg[3] := encode[datao[15:12]];
+		sseg[2] := encode[datao[11:8]];
+		sseg[1] := encode[datao[7:4]];
+		sseg[0] := encode[datao[3:0]];
+	}
+	proc disp5{
+		if(cnt_1s == 50000000){
+			cnt_1s := 0;
+			finish();
+		}else{
+			cnt_1s++;
+		}
+		sseg[3] := encode[datao[15:12]];
+		sseg[2] := encode[datao[11:8]];
+		sseg[1] := encode[datao[7:4]];
+		sseg[0] := encode[datao[3:0]];
+	}
+	proc disp6{
+		if(cnt_1s == 50000000){
+			cnt_1s := 0;
+			finish();
+		}else{
+			cnt_1s++;
+		}
+		sseg[3] := encode[datao[15:12]];
+		sseg[2] := encode[datao[11:8]];
+		sseg[1] := encode[datao[7:4]];
+		sseg[0] := encode[datao[3:0]];
+	}
+	proc disp7{
+		if(cnt_1s == 50000000){
+			cnt_1s := 0;
+			finish();
+		}else{
+			cnt_1s++;
+		}
+		sseg[3] := encode[datao[15:12]];
+		sseg[2] := encode[datao[11:8]];
+		sseg[1] := encode[datao[7:4]];
+		sseg[0] := encode[datao[3:0]];
+	}
+	proc disp8{
 		if(cnt_1s == 50000000){
 			cnt_1s := 0;
 			finish();

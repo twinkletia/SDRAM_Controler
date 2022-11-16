@@ -20,10 +20,12 @@ module SDRAM_SIM{
 	reg cnt[10] = 0;
 	reg bank[2], row[13], column[10], data[16];
 	reg datao[16];
+	mem rdata[8][16];
 	reg finish_status = 0;
 	
 	proc_name sdram_write(bank, row, column, data);
 	proc_name sdram_read(bank, row, column);
+	proc_name disp(datao);
 
 	// SDRAM用クロック
 	sdrctr.m_clock = sdrclk;
@@ -75,14 +77,14 @@ module SDRAM_SIM{
 		sdrctr.bank    = bank;
 		sdrctr.row     = row;
 		sdrctr.column  = column;
-		sdrctr.datai0   = data;
-		sdrctr.datai1   = 16'h0009;
-		sdrctr.datai2   = 16'h000A;
-		sdrctr.datai3   = 16'h000B;
-		sdrctr.datai4   = 16'h000C;
-		sdrctr.datai5   = 16'h000D;
-		sdrctr.datai6   = 16'h000E;
-		sdrctr.datai7   = 16'h000F;
+		sdrctr.datai0   = 16'h1234;//data;
+		sdrctr.datai1   = 16'h3456;
+		sdrctr.datai2   = 16'h5678;
+		sdrctr.datai3   = 16'h789A;
+		sdrctr.datai4   = 16'h9ABC;
+		sdrctr.datai5   = 16'hBCDE;
+		sdrctr.datai6   = 16'hDEF0;
+		sdrctr.datai7   = 16'hF012;
 	}
 
 	proc sdram_read{
@@ -106,8 +108,16 @@ module SDRAM_SIM{
 		{
 			req_flag := 1;
 			write_flag := 0;
-			datao := sdrctr.datao0;
+			rdata[0] := sdrctr.datao0;
+			rdata[1] := sdrctr.datao1;
+			rdata[2] := sdrctr.datao2;
+			rdata[3] := sdrctr.datao3;
+			rdata[4] := sdrctr.datao4;
+			rdata[5] := sdrctr.datao5;
+			rdata[6] := sdrctr.datao6;
+			rdata[7] := sdrctr.datao7;
 		}
 	}
-}
+
+	
 

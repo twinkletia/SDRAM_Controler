@@ -5,7 +5,7 @@ ip-generate --file-set=quartus_synth \
 --component-param=gui_number_of_clocks=\"2\" \
 --component-param=gui_reference_clock_frequency=\"50.0\" \
 --component-param=gui_cascade_counter0=\"false\" \
---component-param=gui_output_clock_frequency0=\"133.3\" \
+--component-param=gui_output_clock_frequency0=\"100.0\" \
 --component-param=gui_divide_factor_c0=\"1\" \
 --component-param=gui_actual_output_clock_frequency0=\"0 MHz\" \
 --component-param=gui_ps_units0=\"ps\" \
@@ -14,11 +14,11 @@ ip-generate --file-set=quartus_synth \
 --component-param=gui_actual_phase_shift0=\"0\" \
 --component-param=gui_duty_cycle0=\"50\" \
 --component-param=gui_cascade_counter1=\"false\" \
---component-param=gui_output_clock_frequency1=\"133.3\" \
+--component-param=gui_output_clock_frequency1=\"100.0\" \
 --component-param=gui_divide_factor_c1=\"1\" \
 --component-param=gui_actual_output_clock_frequency1=\"0 MHz\" \
 --component-param=gui_ps_units1=\"ps\" \
---component-param=gui_phase_shift1=\"0\" \
+--component-param=gui_phase_shift1=\"-1500\" \
 --component-param=gui_phase_shift_deg1=\"0.0\" \
 --component-param=gui_actual_phase_shift1=\"0\" \
 --component-param=gui_duty_cycle1=\"50\" \

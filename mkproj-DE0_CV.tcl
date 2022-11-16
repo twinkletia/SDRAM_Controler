@@ -344,8 +344,6 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SW[7]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SW[8]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SW[9]
 
-
-
 #============================================================
 # End of pin and io_standard assignments
 #============================================================

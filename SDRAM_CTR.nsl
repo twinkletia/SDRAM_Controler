@@ -4,15 +4,15 @@
 #define READ		1'b1
 #define WRITE		1'b0
 
-#define tRP 		8'd2	// PREからACT
-#define tRC 		8'd8	// REFからREF
-#define tRCD		8'd2	// ACTからRWコマンド
-#define tRAS		8'd5 	// ACTからPRE
-#define tDAL		8'd4 	// WTからPRE終了
-#define tCAC		8'd2	// CASレーテンシ
+#define tRP 		15'd3	// PREからACT
+#define tRC 		15'd10	// REFからREF
+#define tRCD		15'd3	// ACTからRWコマンド
+#define tRAS		15'd7 	// ACTからPRE
+#define tDAL		15'd5 	// WTからPRE終了
+#define tCAC		15'd3	// CASレーテンシ
 
-#define INIT_WAIT	8'd30
-#define INIT_PALL	INIT_WAIT+8'd1
+#define INIT_WAIT	15'd10000
+#define INIT_PALL	INIT_WAIT+15'd1
 #define INIT_REF1	INIT_PALL+tRP
 #define INIT_REF2	INIT_REF1+tRC
 #define INIT_REF3	INIT_REF2+tRC
@@ -27,19 +27,19 @@
 
 #define REF_CYC		9'd511	// リフレッシュサイクル
 
-#define REF 		8'd0
+#define REF 		15'd0
 #define ENDREF		REF+tRC
 
-#define R_ACT		8'd0
+#define R_ACT		15'd0
 #define R_EXE		R_ACT+tRCD
 #define R_ENDPRE	R_ACT+tRAS+tRP
 #define R_OUT		R_EXE+tCAC
 
-#define W_ACT		8'd0
+#define W_ACT		15'd0
 #define W_EXE 		W_ACT+tRCD
 #define W_ENDPRE	W_EXE+tDAL
 
-#define M_OPTION	6'b000000	// オプション
+#define M_OPTION	6'b000000	// オプション [2] = Write burst mode
 #define M_CASL		3'b010		// CASレーテンシ
 #define M_WRAP		1'b0		// ラップタイプ
 #define M_BURST		3'b011		// バースト長
@@ -49,11 +49,25 @@ module SDRAM_CTR{
 
 	reg init_end = 0;
 
-	reg cnt[8] = 0;
+	reg cnt[15] = 0;
 	reg ref_cnt[9] = 0;
 
-	mem rdata[8][16];
-	mem wdata[8][16];
+	reg rdata0[16];
+	reg rdata1[16];
+	reg rdata2[16];
+	reg rdata3[16];
+	reg rdata4[16];
+	reg rdata5[16];
+	reg rdata6[16];
+	reg rdata7[16];
+	reg wdata0[16];
+	reg wdata1[16];
+	reg wdata2[16];
+	reg wdata3[16];
+	reg wdata4[16];
+	reg wdata5[16];
+	reg wdata6[16];
+	reg wdata7[16];
 	reg ldqm = 1;
 	reg udqm = 1;
 
@@ -65,6 +79,8 @@ module SDRAM_CTR{
 
 	func_self rburst_terminate;
 	func_self wburst_terminate;
+	func_self rburst;
+	func_self wburst;
 
 	proc_name init();
 	proc_name idle();
@@ -93,14 +109,14 @@ module SDRAM_CTR{
 		rw_mode == READ:  read_req  := 1;	
 		rw_mode == WRITE: 	{
 								write_req := 1;
-								wdata[0] := datai0;
-								wdata[1] := datai1;
-								wdata[2] := datai2;
-								wdata[3] := datai3;
-								wdata[4] := datai4;
-								wdata[5] := datai5;
-								wdata[6] := datai6;
-								wdata[7] := datai7;
+								wdata0 := datai0;
+								wdata1 := datai1;
+								wdata2 := datai2;
+								wdata3 := datai3;
+								wdata4 := datai4;
+								wdata5 := datai5;
+								wdata6 := datai6;
+								wdata7 := datai7;
 							}
 	}
 
@@ -180,13 +196,13 @@ module SDRAM_CTR{
 
 	// REF_CYCクロック毎にオートリフレッシュ
 	proc refresh{
-		if(cnt == ENDREF-8'd2) cnt := 0;
+		if(cnt == ENDREF-15'd2) cnt := 0;
 		else				   cnt++;
 
 		alt{
 			cnt == REF:			cmd_ref();
-			cnt <  ENDREF-8'd2:	cmd_nop();
-			cnt == ENDREF-8'd2:{
+			cnt <  ENDREF-15'd2:	cmd_nop();
+			cnt == ENDREF-15'd2:{
 								cmd_nop();
 								ref_cnt := REF_CYC;
 								idle();
@@ -201,17 +217,17 @@ module SDRAM_CTR{
 		ref_cnt--;
 	}
 
-	datao0 = rdata[0];
-	datao1 = rdata[1];
-	datao2 = rdata[2];
-	datao3 = rdata[3];
-	datao4 = rdata[4];
-	datao5 = rdata[5];
-	datao6 = rdata[6];
-	datao7 = rdata[7];
+	datao0 = rdata0;
+	datao1 = rdata1;
+	datao2 = rdata2;
+	datao3 = rdata3;
+	datao4 = rdata4;
+	datao5 = rdata5;
+	datao6 = rdata6;
+	datao7 = rdata7;
 
 	proc read{
-		if(cnt == R_ENDPRE-8'd2) cnt := 0;
+		if(cnt == R_ENDPRE-15'd2) cnt := 0;
 		else					 cnt++;
 
 		alt{
@@ -224,8 +240,8 @@ module SDRAM_CTR{
 								rburst_terminate();
 								rx.aRxAck();
 			}
-			cnt <  R_ENDPRE-8'd2:	cmd_nop();
-			cnt == R_ENDPRE-8'd2:{
+			cnt <  R_ENDPRE-15'd2:	cmd_nop();
+			cnt == R_ENDPRE-15'd2:{
 									cmd_nop();
 									idle();
 			}
@@ -233,7 +249,7 @@ module SDRAM_CTR{
 	}
 
 	proc write{
-		if(cnt == W_ENDPRE-8'd2) cnt := 0;
+		if(cnt == W_ENDPRE-15'd2) cnt := 0;
 		else					 cnt++;
 
 		alt{
@@ -244,34 +260,56 @@ module SDRAM_CTR{
 								wburst_terminate();
 								rx.aRxAck();
 			}
-			cnt <  W_ENDPRE-8'd2:	cmd_nop();
-			cnt == W_ENDPRE-8'd2:{
+			cnt <  W_ENDPRE-15'd2:	cmd_nop();
+			cnt == W_ENDPRE-15'd2:{
 									cmd_nop();
 									idle();
 			}
 		}
 	}
 
+	func wburst{
+		DRAM_DO = wdata0;
+		wdata0 := wdata1;
+		wdata1 := wdata2;
+		wdata2 := wdata3;
+		wdata3 := wdata4;
+		wdata4 := wdata5;
+		wdata5 := wdata6;
+		wdata6 := wdata7;
+	}
+
 	func wburst_terminate seq{
-		DRAM_DO = wdata[0];
-		DRAM_DO = wdata[1];
-		DRAM_DO = wdata[2];
-		DRAM_DO = wdata[3];
-		DRAM_DO = wdata[4];
-		DRAM_DO = wdata[5];
-		DRAM_DO = wdata[6];
-		DRAM_DO = wdata[7];
+		wburst();
+		wburst();
+		wburst();
+		wburst();
+		wburst();
+		wburst();
+		wburst();
+		wburst();
 	}
 
 	func rburst_terminate seq{
-		rdata[0] := DRAM_DI;
-		rdata[1] := DRAM_DI;
-		rdata[2] := DRAM_DI;
-		rdata[3] := DRAM_DI;
-		rdata[4] := DRAM_DI;
-		rdata[5] := DRAM_DI;
-		rdata[6] := DRAM_DI;
-		rdata[7] := DRAM_DI;
+		rburst();
+		rburst();
+		rburst();
+		rburst();
+		rburst();
+		rburst();
+		rburst();
+		rburst();
+	}
+
+	func rburst{
+		rdata7 := DRAM_DI;
+		rdata6 := rdata7;
+		rdata5 := rdata6;
+		rdata4 := rdata5;
+		rdata3 := rdata4;
+		rdata2 := rdata3;
+		rdata1 := rdata2;
+		rdata0 := rdata1;
 	}
 
 	func cmd_nop{

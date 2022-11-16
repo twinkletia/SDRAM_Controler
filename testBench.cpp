@@ -36,7 +36,7 @@ public:
     unsigned long long tick(void)
     {
 #define REFCYC 1000 // per 10ps
-#define SDRCYC 375  // per 10ps
+#define SDRCYC 500  // per 10ps
         static int refclkCnt = 0, sdrclkCnt = SDRCYC - REFCYC;
         refclkCnt++;
         sdrclkCnt++;
