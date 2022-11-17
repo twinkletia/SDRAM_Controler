@@ -9,7 +9,7 @@
 #define tRCD		15'd3	// ACTからRWコマンド
 #define tRAS		15'd7 	// ACTからPRE
 #define tDAL		15'd5 	// WTからPRE終了
-#define tCAC		15'd3	// CASレーテンシ
+#define tCAC		15'd2	// CASレーテンシ
 
 #define INIT_WAIT	15'd10000
 #define INIT_PALL	INIT_WAIT+15'd1

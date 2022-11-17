@@ -118,6 +118,7 @@ module SDRAM_SIM{
 			rdata[7] := sdrctr.datao7;
 		}
 	}
+}
 
 	
 

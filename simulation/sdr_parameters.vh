@@ -6,7 +6,7 @@ parameter tCK              =     10.0; // tCK    ns    Nominal Clock Cycle Time
 parameter tCK3_min         =     0.0; // tCK    ns    Nominal Clock Cycle Time
 parameter tCK2_min         =     10.0; // tCK    ns    Nominal Clock Cycle Time
 parameter tCK1_min         =     0.0; // tCK    ns    Nominal Clock Cycle Time
-parameter tAC3             =     0.0; // tAC3   ns    Access time from CLK (pos edge) CL = 3
+parameter tAC3             =     5.0; // tAC3   ns    Access time from CLK (pos edge) CL = 3
 parameter tAC2             =     6.0; // tAC2   ns    Access time from CLK (pos edge) CL = 2
 parameter tAC1             =     0.0; // tAC1   ns    Parameter definition for compilation - CL = 1 illegal for sg75
 parameter tHZ3             =     5.0; // tHZ3   ns    Data Out High Z time - CL = 3
