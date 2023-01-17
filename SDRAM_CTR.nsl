@@ -27,17 +27,19 @@
 
 #define REF_CYC		9'd511	// リフレッシュサイクル
 
+#define BLEN 8
+
 #define REF 		15'd0
 #define ENDREF		REF+tRC
 
 #define R_ACT		15'd0
 #define R_EXE		R_ACT+tRCD
-#define R_ENDPRE	R_ACT+tRAS+tRP
+#define R_ENDPRE	R_ACT+tRAS+tRP+(BLEN-1)
 #define R_OUT		R_EXE+tCAC
 
 #define W_ACT		15'd0
 #define W_EXE 		W_ACT+tRCD
-#define W_ENDPRE	W_EXE+tDAL
+#define W_ENDPRE	W_EXE+tDAL+(BLEN-1)
 
 #define M_OPTION	6'b000000	// オプション [2] = Write burst mode
 #define M_CASL		3'b010		// CASレーテンシ
@@ -121,6 +123,7 @@ module SDRAM_CTR{
 	}
 
 	if(!init_flag){
+		cmd_nop();
 		init();
 		init_flag := 1;
 	}
@@ -238,11 +241,11 @@ module SDRAM_CTR{
 			cnt == R_OUT:{
 								cmd_nop();
 								rburst_terminate();
-								rx.aRxAck();
 			}
 			cnt <  R_ENDPRE-15'd2:	cmd_nop();
 			cnt == R_ENDPRE-15'd2:{
 									cmd_nop();
+									rx.aRxAck();
 									idle();
 			}
 		}
@@ -258,11 +261,11 @@ module SDRAM_CTR{
 			cnt == W_EXE:{
 								cmd_wta();
 								wburst_terminate();
-								rx.aRxAck();
 			}
 			cnt <  W_ENDPRE-15'd2:	cmd_nop();
 			cnt == W_ENDPRE-15'd2:{
 									cmd_nop();
+									rx.aRxAck();
 									idle();
 			}
 		}
